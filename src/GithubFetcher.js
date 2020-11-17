@@ -8,7 +8,8 @@ class GithubFetcher extends Component {
         this.state = {
             nameToBeFetched: '',
             data: [],
-            isDisabled: true
+            isDisabled: true,
+            searchedNames: []
         }
 
         this.removeItem = this.removeItem.bind(this)
@@ -38,8 +39,9 @@ class GithubFetcher extends Component {
                     arr.push(res)
                     this.setState({
                         data: arr,
+                        isDisabled: true,
+                        searchedNames: [...this.state.searchedNames, this.state.nameToBeFetched],
                         nameToBeFetched: "",
-                        isDisabled: true
                     })
                     
                 })
@@ -51,12 +53,20 @@ class GithubFetcher extends Component {
     }
 
     removeItem = (item) => {
-        this.state.data.map((savedItem) => {
-            if(savedItem.id === item.id) {
-                this.setState({
-                    data: this.state.data.filter(i => i.id !== item.id)
-                })
-            }
+        // Try to find the remove id with corresponding state id
+        const findItem = this.state.data.find(x => x.id === item.id)
+        // If found, then update (remove) state
+        if(findItem) {
+            this.setState({
+                data: this.state.data.filter(i => i.id !== findItem.id)
+            })
+        }
+    }
+
+    fillInput(str) {
+        this.setState({
+            nameToBeFetched: str,
+            isDisabled: false
         })
     }
 
@@ -73,6 +83,12 @@ class GithubFetcher extends Component {
                     <button type="submit" disabled={this.state.isDisabled} onClick={this.handleClick}>fetch</button>
                 </form>
                 <GitProfile brand={this.state.data} onClick={this.removeItem } />
+                {this.state.searchedNames.length > 0 ? <h3>Search history:</h3> : ''}
+                <ul>
+                    {this.state.searchedNames && this.state.searchedNames.map((name, i) => {
+                        return <li key={i} onClick={() => this.fillInput(name)}>{name}</li>
+                    })}
+                </ul>
             </div>
 
         );
